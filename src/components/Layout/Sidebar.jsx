@@ -4,14 +4,27 @@ import { Link, useLocation } from 'react-router-dom';
 const Sidebar = () => {
   const location = useLocation();
 
-  const menuItems = [
+  let user = null;
+  try {
+    // user = JSON.parse(localStorage.getItem('user'));
+    // TODO: Get user from context or API instead of localStorage
+  } catch {}
+  let menuItems = [
     { path: '/', label: 'Dashboard', icon: '🏠' },
-    { path: '/book-ticket', label: 'Book Ticket', icon: '🎫' },
+    { path: '/profile', label: 'Profile', icon: '👤' },
     { path: '/schedule', label: 'Schedule', icon: '🚆' },
-    { path: '/track-train', label: 'Track Train', icon: '📍' },
-    { path: '/seat-availability', label: 'Seat Availability', icon: '🪑' },
     { path: '/complaints', label: 'Complaints', icon: '📝' },
   ];
+  if (!user || user.role !== 'admin') {
+    menuItems = [
+      { path: '/', label: 'Dashboard', icon: '🏠' },
+      { path: '/profile', label: 'Profile', icon: '👤' },
+      { path: '/book-ticket', label: 'Book Ticket', icon: '🎫' },
+      { path: '/schedule', label: 'Schedule', icon: '🚆' },
+      { path: '/track-train', label: 'Track Train', icon: '📍' },
+      { path: '/complaints', label: 'Complaints', icon: '📝' },
+    ];
+  }
 
   return (
     <motion.aside
@@ -46,4 +59,5 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
 

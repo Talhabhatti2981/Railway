@@ -99,11 +99,27 @@ export const seatStorage = {
   bookSeat: (trainNumber, date, seatNumber) => {
     const seats = seatStorage.getAll();
     const key = `${trainNumber}_${date}`;
+    
+    // Initialize if doesn't exist
     if (!seats[key]) {
-      seats[key] = { booked: [], available: [] };
+      const coachList = ['A', 'B', 'C', 'D'];
+      const seatsPerCoach = 15;
+      const available = [];
+      
+      coachList.forEach(coach => {
+        for (let i = 1; i <= seatsPerCoach; i++) {
+          available.push(`${coach}-${i}`);
+        }
+      });
+      
+      seats[key] = { booked: [], available };
     }
+    
+    // Only book if not already booked
     if (!seats[key].booked.includes(seatNumber)) {
       seats[key].booked.push(seatNumber);
+      // Remove from available array
+      seats[key].available = seats[key].available.filter(seat => seat !== seatNumber);
       seatStorage.save(seats);
     }
   },

@@ -1,20 +1,47 @@
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
-import { Train, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Train, Menu, LogOut, LogIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: '🏠' },
-    { path: '/book-ticket', label: 'Book Ticket', icon: '🎫' },
-    { path: '/schedule', label: 'Schedule', icon: '🚆' },
-    { path: '/track-train', label: 'Track Train', icon: '📍' },
-    { path: '/seat-availability', label: 'Seats', icon: '🪑' },
-    { path: '/complaints', label: 'Complaints', icon: '📝' },
-  ];
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      setIsAuthenticated(true);
+      setUser(JSON.parse(userData));
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
+    }
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+    setUser(null);
+    navigate('/login');
+  };
+
+  // const navItems = [
+  //   { path: '/', label: 'Dashboard', icon: '🏠' },
+  //   { path: '/book-ticket', label: 'Book Ticket', icon: '🎫' },
+  //   { path: '/schedule', label: 'Schedule', icon: '🚆' },
+  //   { path: '/track-train', label: 'Track Train', icon: '📍' },
+  //   { path: '/seat-availability', label: 'Seats', icon: '🪑' },
+  //   { path: '/complaints', label: 'Complaints', icon: '📝' },
+  // ];
+
+  if (!isAuthenticated) {
+    return null; // Hide navbar if not authenticated
+  }
 
   return (
     <motion.nav
@@ -29,8 +56,7 @@ const Navbar = () => {
             <span className="text-xl font-bold">Railway System</span>
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-1">
+          {/* <div className="hidden md:flex space-x-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -45,6 +71,22 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
+          </div> */}
+
+          {/* Auth Section */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user && (
+              <span className="text-sm">
+                Welcome, {user.name} ({user.role})
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-4 py-2 rounded-lg hover:bg-primary-500 transition-all duration-200"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -79,6 +121,20 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
+            <div className="px-4 py-2 text-sm border-t border-primary-500 mt-2 pt-2">
+              {user && (
+                <div className="mb-2">
+                  Welcome, {user.name} ({user.role})
+                </div>
+              )}
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full px-4 py-2 rounded-lg hover:bg-primary-500 transition-all duration-200"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </button>
+            </div>
           </motion.div>
         )}
       </div>
@@ -87,4 +143,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
 

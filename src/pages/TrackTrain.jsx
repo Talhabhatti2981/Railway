@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Clock, Train } from 'lucide-react';
-import { trainStorage, trackingStorage } from '../utils/localStorage';
+import { trainAPI, trackingAPI } from '../utils/api';
 
 const TrackTrain = () => {
   const [trainNumber, setTrainNumber] = useState('');
@@ -11,55 +11,50 @@ const TrackTrain = () => {
 
   useEffect(() => {
     if (selectedTrain && trackingData) {
-      const interval = setInterval(() => {
-        // Simulate train movement
-        const newPosition = Math.min(position + 2, 100);
-        setPosition(newPosition);
-        trackingStorage.updatePosition(selectedTrain.trainNumber, newPosition);
+      const interval = setInterval(async () => {
+        setPosition(prevPosition => {
+          const newPosition = Math.min(prevPosition + 2, 100);
+          // Update position in backend
+          trackingAPI.updatePosition(selectedTrain.trainNumber, newPosition).catch(console.error);
+          return newPosition;
+        });
       }, 2000);
 
       return () => clearInterval(interval);
     }
-  }, [selectedTrain, trackingData, position]);
+  }, [selectedTrain, trackingData]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!trainNumber) {
       alert('Please enter a train number');
       return;
     }
 
-    const trains = trainStorage.getAll();
-    const train = trains.find(t => t.trainNumber === trainNumber);
+    try {
+      const train = await trainAPI.getByNumber(trainNumber);
 
-    if (!train) {
-      alert('Train not found');
-      return;
+      if (!train) {
+        alert('Train not found. Please check the train number or add trains from Schedule page.');
+        return;
+      }
+
+      setSelectedTrain(train);
+
+      // Get or create tracking data from API
+      let trackData;
+      try {
+        trackData = await trackingAPI.getTracking(trainNumber);
+      } catch (error) {
+        // If tracking doesn't exist, initialize it
+        trackData = await trackingAPI.initialize(trainNumber);
+      }
+
+      setTrackingData(trackData);
+      setPosition(trackData.currentPosition || 0);
+    } catch (error) {
+      console.error('Error searching train:', error);
+      alert('Error loading train data: ' + (error.message || 'Unknown error'));
     }
-
-    setSelectedTrain(train);
-
-    // Get or create tracking data
-    let trackData = trackingStorage.getTrain(trainNumber);
-    if (!trackData) {
-      trackData = {
-        trainNumber: train.trainNumber,
-        currentPosition: 0,
-        route: [
-          { station: train.from, distance: 0, time: train.departureTime },
-          ...(train.stops || []).map((stop, idx) => ({
-            station: stop.station,
-            distance: ((idx + 1) * 100) / ((train.stops?.length || 0) + 1),
-            time: stop.time,
-          })),
-          { station: train.to, distance: 100, time: train.arrivalTime },
-        ],
-        lastUpdated: new Date().toISOString(),
-      };
-      trackingStorage.setTrain(trainNumber, trackData);
-    }
-
-    setTrackingData(trackData);
-    setPosition(trackData.currentPosition || 0);
   };
 
   const getCurrentStation = () => {

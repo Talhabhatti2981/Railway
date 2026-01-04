@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { complaintStorage, trainStorage } from '../utils/localStorage';
+import { complaintAPI, userAPI } from '../utils/api';
 import { formatDate } from '../utils/helpers';
 
 const Complaints = () => {
   const [complaints, setComplaints] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState('all'); // all, pending, resolved
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     category: '',
     name: '',
@@ -16,15 +19,44 @@ const Complaints = () => {
   });
 
   useEffect(() => {
-    loadComplaints();
+    const fetchUser = async () => {
+      try {
+        const userData = await userAPI.getMe();
+        setUser(userData);
+      } catch (err) {
+        setUser(null);
+      }
+    };
+    fetchUser();
   }, []);
 
-  const loadComplaints = () => {
-    const allComplaints = complaintStorage.getAll();
-    setComplaints(allComplaints.sort((a, b) => new Date(b.date) - new Date(a.date)));
+  useEffect(() => {
+    if (user) {
+      loadComplaints();
+    }
+  }, [user]);
+
+  const loadComplaints = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      let allComplaints;
+      if (user && user.role === 'admin') {
+        allComplaints = await complaintAPI.getAll();
+      } else {
+        allComplaints = await complaintAPI.getMy();
+      }
+      setComplaints(allComplaints.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    } catch (error) {
+      console.error('Error loading complaints:', error);
+      setError('Failed to load complaints. Please check if the server is running.');
+      setComplaints([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.category || !formData.name || !formData.trainNumber || !formData.description) {
@@ -32,24 +64,24 @@ const Complaints = () => {
       return;
     }
 
-    const complaint = {
-      id: Date.now().toString(),
-      category: formData.category,
-      name: formData.name,
-      trainNumber: formData.trainNumber,
-      description: formData.description,
-      status: 'Pending',
-      date: new Date().toISOString(),
-    };
-
-    complaintStorage.add(complaint);
-    loadComplaints();
-    resetForm();
+    try {
+      await complaintAPI.create(formData);
+      await loadComplaints();
+      resetForm();
+    } catch (error) {
+      console.error('Error creating complaint:', error);
+      alert('Error creating complaint: ' + (error.message || 'Unknown error'));
+    }
   };
 
-  const handleStatusChange = (id, newStatus) => {
-    complaintStorage.update(id, { status: newStatus });
-    loadComplaints();
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await complaintAPI.update(id, { status: newStatus });
+      await loadComplaints();
+    } catch (error) {
+      console.error('Error updating complaint:', error);
+      alert('Error updating complaint: ' + (error.message || 'Unknown error'));
+    }
   };
 
   const resetForm = () => {
@@ -265,7 +297,7 @@ const Complaints = () => {
         ) : (
           filteredComplaints.map((complaint, index) => (
             <motion.div
-              key={complaint.id}
+              key={complaint._id || complaint.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -285,7 +317,7 @@ const Complaints = () => {
                       {complaint.category}
                     </span>
                     <span className="text-sm text-gray-500">
-                      {formatDate(complaint.date)}
+                      {formatDate(complaint.createdAt)}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 mb-2">
@@ -301,7 +333,7 @@ const Complaints = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleStatusChange(complaint.id, 'Resolved')}
+                      onClick={() => handleStatusChange(complaint._id || complaint.id, 'Resolved')}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 flex items-center space-x-2"
                     >
                       <CheckCircle className="h-4 w-4" />
@@ -312,7 +344,7 @@ const Complaints = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleStatusChange(complaint.id, 'Pending')}
+                      onClick={() => handleStatusChange(complaint._id || complaint.id, 'Pending')}
                       className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 flex items-center space-x-2"
                     >
                       <Clock className="h-4 w-4" />

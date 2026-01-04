@@ -1,14 +1,19 @@
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import ChatWidget from '../ChatWidget';
 
 const Layout = ({ children }) => {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login';
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      {!isAuthPage && <Navbar />}
       <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6 lg:ml-0">
+        {!isAuthPage && <Sidebar />}
+        <main className={`flex-1 p-6 ${!isAuthPage ? 'lg:ml-0' : ''}`}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -18,9 +23,11 @@ const Layout = ({ children }) => {
           </motion.div>
         </main>
       </div>
+      {!isAuthPage && <ChatWidget />}
     </div>
   );
 };
 
 export default Layout;
+
 

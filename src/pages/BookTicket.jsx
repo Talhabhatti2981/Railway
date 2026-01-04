@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Calendar, MapPin, User, CheckCircle } from 'lucide-react';
-import { trainStorage, bookingStorage, seatStorage } from '../utils/localStorage';
-import { generatePNR, formatDate, calculateDuration } from '../utils/helpers';
+import { trainAPI, bookingAPI, seatAPI } from '../utils/api';
+import { formatDate, calculateDuration } from '../utils/helpers';
 
 const BookTicket = () => {
   const [searchData, setSearchData] = useState({
@@ -22,162 +22,153 @@ const BookTicket = () => {
   });
   const [bookingSuccess, setBookingSuccess] = useState(null);
   const [showTicket, setShowTicket] = useState(false);
+  const [availableSeats, setAvailableSeats] = useState([]);
+  const [selectedSeat, setSelectedSeat] = useState('');
+  const [seatError, setSeatError] = useState('');
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchData.from || !searchData.to || !searchData.date) {
       alert('Please fill all search fields');
       return;
     }
-    const trains = trainStorage.findByRoute(searchData.from, searchData.to);
-    setAvailableTrains(trains);
+    try {
+      const trains = await trainAPI.searchByRoute(searchData.from, searchData.to);
+      setAvailableTrains(trains);
+    } catch (error) {
+      console.error('Error searching trains:', error);
+      alert('Error searching trains: ' + (error.message || 'Unknown error'));
+    }
   };
 
-  const handleBook = (train) => {
+  const handleBook = async (train) => {
     setSelectedTrain(train);
+    setSelectedSeat('');
+    setSeatError('');
+    // Fetch available seats for this train/date/class
+    if (train && searchData.class && searchData.date) {
+      try {
+        const seats = await seatAPI.getSeats(train.trainNumber, searchData.date, searchData.class);
+        setAvailableSeats(seats.available);
+      } catch (err) {
+        setAvailableSeats([]);
+        setSeatError('Could not load available seats.');
+      }
+    } else {
+      setAvailableSeats([]);
+    }
   };
 
-  const handleSubmitBooking = () => {
+  const handleSubmitBooking = async () => {
     if (!passengerData.name || !passengerData.age || !passengerData.gender || !passengerData.phone) {
       alert('Please fill all passenger details');
       return;
     }
-
-    // Get available seats
-    const seatData = seatStorage.getSeats(selectedTrain.trainNumber, searchData.date);
-    let availableSeats = [];
-    
-    if (!seatData) {
-      // Initialize seats
-      const coaches = ['A', 'B', 'C', 'D'];
-      coaches.forEach(coach => {
-        for (let i = 1; i <= 15; i++) {
-          availableSeats.push(`${coach}-${i}`);
-        }
-      });
-    } else {
-      availableSeats = seatData.available.filter(seat => !seatData.booked.includes(seat));
-    }
-
-    if (availableSeats.length === 0) {
-      alert('No seats available');
+    if (!selectedSeat) {
+      setSeatError('Please select a seat');
       return;
     }
-
-    // Assign seat
-    const assignedSeat = availableSeats[0];
-    
-    // Create booking
-    const pnr = generatePNR();
-    const booking = {
-      pnr,
-      trainNumber: selectedTrain.trainNumber,
-      trainName: selectedTrain.trainName,
-      from: selectedTrain.from,
-      to: selectedTrain.to,
-      date: searchData.date,
-      class: searchData.class,
-      seat: assignedSeat,
-      passenger: passengerData,
-      bookingDate: new Date().toISOString(),
-      status: 'Confirmed',
-    };
-
-    bookingStorage.add(booking);
-    seatStorage.bookSeat(selectedTrain.trainNumber, searchData.date, assignedSeat);
-
-    setBookingSuccess(booking);
-    setShowTicket(true);
-    
-    // Reset form
-    setSelectedTrain(null);
-    setPassengerData({ name: '', age: '', gender: '', phone: '', email: '' });
+    try {
+      const booking = {
+        trainNumber: selectedTrain.trainNumber,
+        trainName: selectedTrain.trainName,
+        from: selectedTrain.from,
+        to: selectedTrain.to,
+        date: searchData.date,
+        class: searchData.class,
+        seat: selectedSeat,
+        passenger: passengerData,
+      };
+      const savedBooking = await bookingAPI.create(booking);
+      setBookingSuccess(savedBooking);
+      setShowTicket(true);
+      setSelectedTrain(null);
+      setPassengerData({ name: '', age: '', gender: '', phone: '', email: '' });
+      setSearchData({ from: '', to: '', date: '', class: '' });
+      setAvailableTrains([]);
+      setAvailableSeats([]);
+      setSelectedSeat('');
+      setSeatError('');
+    } catch (error) {
+      setSeatError('Error creating booking: ' + (error.message || 'Unknown error'));
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-[80vh] w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 py-8 px-2 md:px-0">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-2xl mx-auto"
       >
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Book Ticket</h1>
-        <p className="text-gray-600">Search and book your train tickets</p>
-      </motion.div>
-
-      {/* Search Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-md p-6"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <MapPin className="inline h-4 w-4 mr-1" />
-              From
-            </label>
-            <input
-              type="text"
-              value={searchData.from}
-              onChange={(e) => setSearchData({ ...searchData, from: e.target.value })}
-              placeholder="Source station"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <MapPin className="inline h-4 w-4 mr-1" />
-              To
-            </label>
-            <input
-              type="text"
-              value={searchData.to}
-              onChange={(e) => setSearchData({ ...searchData, to: e.target.value })}
-              placeholder="Destination station"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Calendar className="inline h-4 w-4 mr-1" />
-              Date
-            </label>
-            <input
-              type="date"
-              value={searchData.date}
-              onChange={(e) => setSearchData({ ...searchData, date: e.target.value })}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Class
-            </label>
-            <select
-              value={searchData.class}
-              onChange={(e) => setSearchData({ ...searchData, class: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="">Select Class</option>
-              <option value="AC First">AC First</option>
-              <option value="AC Second">AC Second</option>
-              <option value="AC Third">AC Third</option>
-              <option value="Sleeper">Sleeper</option>
-              <option value="AC Chair Car">AC Chair Car</option>
-              <option value="Executive">Executive</option>
-            </select>
+        <div className="bg-white rounded-3xl shadow-2xl border border-blue-100 p-8 md:p-10 flex flex-col items-center relative">
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-blue-700 rounded-full px-6 py-2 text-white font-bold text-lg shadow-lg">Book Ticket</div>
+          <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div>
+              <label className="block text-xs font-bold text-blue-900 mb-1">From</label>
+              <input
+                type="text"
+                value={searchData.from}
+                onChange={(e) => setSearchData({ ...searchData, from: e.target.value })}
+                placeholder="Start location"
+                className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-400 bg-blue-50 text-blue-900 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-blue-900 mb-1">To</label>
+              <input
+                type="text"
+                value={searchData.to}
+                onChange={(e) => setSearchData({ ...searchData, to: e.target.value })}
+                placeholder="Destination"
+                className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-400 bg-blue-50 text-blue-900 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-blue-900 mb-1">Date of travel</label>
+              <input
+                type="date"
+                value={searchData.date}
+                onChange={(e) => setSearchData({ ...searchData, date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-400 bg-blue-50 text-blue-900 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-blue-900 mb-1">Class</label>
+              <select
+                value={searchData.class}
+                onChange={(e) => setSearchData({ ...searchData, class: e.target.value })}
+                className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-400 bg-blue-50 text-blue-900 font-semibold"
+              >
+                <option value="">Select Class</option>
+                <option value="AC First">AC First</option>
+                <option value="AC Second">AC Second</option>
+                <option value="AC Third">AC Third</option>
+                <option value="Sleeper">Sleeper</option>
+                <option value="AC Chair Car">AC Chair Car</option>
+                <option value="Executive">Executive</option>
+              </select>
+            </div>
+            <div className="md:col-span-2 flex flex-col md:flex-row gap-4 mt-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={handleSearch}
+                className="flex-1 px-6 py-3 bg-blue-700 text-white rounded-lg font-bold shadow hover:bg-blue-800 transition-colors flex items-center justify-center gap-2"
+              >
+                <Search className="h-5 w-5" />
+                <span>Search Available Trains</span>
+              </motion.button>
+            </div>
+          </form>
+          <div className="w-full flex justify-end mt-4">
+            <a href="/my-tickets" className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">View All My Tickets</a>
           </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleSearch}
-          className="mt-4 w-full md:w-auto px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center space-x-2"
-        >
-          <Search className="h-5 w-5" />
-          <span>Search Trains</span>
-        </motion.button>
       </motion.div>
+
+      {/* ...existing code for available trains, passenger form, and ticket slip... */}
 
       {/* Available Trains */}
       <AnimatePresence>
@@ -239,7 +230,7 @@ const BookTicket = () => {
         )}
       </AnimatePresence>
 
-      {/* Passenger Details Form */}
+      {/* Passenger Details Form + Seat Selection */}
       <AnimatePresence>
         {selectedTrain && (
           <motion.div
@@ -305,6 +296,24 @@ const BookTicket = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   placeholder="Enter email address"
                 />
+              </div>
+            </div>
+            {/* Seat Selection */}
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-2">Select Seat</h3>
+              {seatError && <div className="text-red-600 mb-2">{seatError}</div>}
+              <div className="flex flex-wrap gap-2">
+                {availableSeats.length === 0 && <span className="text-gray-500">No seats available</span>}
+                {availableSeats.map(seat => (
+                  <button
+                    key={seat}
+                    type="button"
+                    className={`px-4 py-2 rounded border font-semibold ${selectedSeat === seat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-blue-100'}`}
+                    onClick={() => { setSelectedSeat(seat); setSeatError(''); }}
+                  >
+                    {seat}
+                  </button>
+                ))}
               </div>
             </div>
             <div className="mt-6 flex space-x-4">
