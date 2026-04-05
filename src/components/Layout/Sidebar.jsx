@@ -6,8 +6,7 @@ const Sidebar = () => {
 
   let user = null;
   try {
-    // user = JSON.parse(localStorage.getItem('user'));
-    // TODO: Get user from context or API instead of localStorage
+    user = JSON.parse(localStorage.getItem('user'));
   } catch {}
   let menuItems = [
     { path: '/', label: 'Dashboard', icon: '🏠' },
@@ -15,6 +14,7 @@ const Sidebar = () => {
     { path: '/schedule', label: 'Schedule', icon: '🚆' },
     { path: '/complaints', label: 'Complaints', icon: '📝' },
   ];
+  // Show Book Ticket and Track Train only for non-admin users
   if (!user || user.role !== 'admin') {
     menuItems = [
       { path: '/', label: 'Dashboard', icon: '🏠' },
@@ -22,6 +22,7 @@ const Sidebar = () => {
       { path: '/book-ticket', label: 'Book Ticket', icon: '🎫' },
       { path: '/schedule', label: 'Schedule', icon: '🚆' },
       { path: '/track-train', label: 'Track Train', icon: '📍' },
+      { path: '/my-tickets', label: 'My Tickets', icon: '📋' },
       { path: '/complaints', label: 'Complaints', icon: '📝' },
     ];
   }
@@ -30,7 +31,7 @@ const Sidebar = () => {
     <motion.aside
       initial={{ x: -250 }}
       animate={{ x: 0 }}
-      className="hidden lg:block w-64 bg-white shadow-lg min-h-screen p-6"
+      className="hidden lg:flex flex-col w-64 bg-white shadow-xl min-h-screen p-4 sm:p-6 sticky top-16"
     >
       <div className="space-y-2">
         {menuItems.map((item, index) => (
@@ -42,13 +43,13 @@ const Sidebar = () => {
           >
             <Link
               to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              className={`flex items-center space-x-3 px-4 py-3 sm:py-2.5 rounded-lg transition-all duration-200 text-sm sm:text-base ${
                 location.pathname === item.path
-                  ? 'bg-primary-600 text-white shadow-md'
-                  : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'
+                  ? 'bg-blue-600 text-white shadow-md font-semibold'
+                  : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
+              <span className="text-lg sm:text-xl flex-shrink-0">{item.icon}</span>
               <span className="font-medium">{item.label}</span>
             </Link>
           </motion.div>

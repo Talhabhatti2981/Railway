@@ -1,8 +1,12 @@
 
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { bookingAPI } from "../utils/api";
+import { Ticket, Calendar, MapPin, Users } from "lucide-react";
 
 const MyTickets = () => {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,9 +17,10 @@ const MyTickets = () => {
         setLoading(true);
         setError("");
         const data = await bookingAPI.getMy();
-        setTickets(data);
+        setTickets(data || []);
       } catch (err) {
         setError("Failed to load tickets");
+        setTickets([]);
       } finally {
         setLoading(false);
       }
@@ -24,41 +29,154 @@ const MyTickets = () => {
   }, []);
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">My Tickets</h1>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-600">{error}</p>}
-      {!loading && !error && tickets.length === 0 && (
-        <p>No tickets found.</p>
-      )}
-      {!loading && !error && tickets.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300 rounded-lg">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-4 py-2">PNR</th>
-                <th className="px-4 py-2">Train</th>
-                <th className="px-4 py-2">Date</th>
-                <th className="px-4 py-2">Class</th>
-                <th className="px-4 py-2">Seat</th>
-                <th className="px-4 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tickets.map((ticket) => (
-                <tr key={ticket._id} className="border-t">
-                  <td className="px-4 py-2 font-mono">{ticket.pnr}</td>
-                  <td className="px-4 py-2">{ticket.trainName} (#{ticket.trainNumber})</td>
-                  <td className="px-4 py-2">{ticket.date}</td>
-                  <td className="px-4 py-2">{ticket.class}</td>
-                  <td className="px-4 py-2 font-semibold">{ticket.seat}</td>
-                  <td className="px-4 py-2">{ticket.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-4xl font-bold text-blue-900 mb-2 flex items-center gap-3">
+            <Ticket className="h-8 w-8" />
+            My Tickets
+          </h1>
+          <p className="text-blue-700 mb-6">View all your bookings</p>
+        </motion.div>
+
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+            </div>
+            <p className="text-gray-600 mt-4">Loading tickets...</p>
+          </div>
+        )}
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg"
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {!loading && !error && tickets.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white rounded-xl shadow-md p-12 text-center"
+          >
+            <Ticket className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 text-lg">No tickets found</p>
+          </motion.div>
+        )}
+
+        {!loading && !error && tickets.length > 0 && (
+          <div className="grid gap-4">
+            {tickets.map((ticket, index) => (
+              <motion.div
+                key={ticket._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6"
+              >
+                <div className="flex flex-col justify-between gap-4">
+                  <div className="flex-1">
+                    {/* PNR & Status - Responsive */}
+                    <div className="flex flex-wrap items-center gap-2 gap-y-2 mb-3">
+                      <span className="font-mono font-bold text-blue-700 text-sm sm:text-base">PNR: {ticket.pnr}</span>
+                      <span
+                        className={`px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-bold ${
+                          ticket.status === "RESOLVED"
+                            ? "bg-green-100 text-green-700"
+                            : ticket.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {ticket.status}
+                      </span>
+                    </div>
+
+                    {/* Train Info */}
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3">
+                      {ticket.trainName} <span className="text-xs sm:text-sm text-gray-500">#{ticket.trainNumber}</span>
+                    </h3>
+
+                    {/* Ticket Details Grid - Mobile Optimized */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                      {/* From */}
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-600 font-semibold">From</p>
+                          <p className="font-semibold text-gray-800 truncate">{ticket.from}</p>
+                        </div>
+                      </div>
+
+                      {/* To */}
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-600 font-semibold">To</p>
+                          <p className="font-semibold text-gray-800 truncate">{ticket.to}</p>
+                        </div>
+                      </div>
+
+                      {/* Date */}
+                      <div className="flex items-start gap-2">
+                        <Calendar className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-600 font-semibold">Date</p>
+                          <p className="font-semibold text-gray-800 text-sm">{ticket.date}</p>
+                        </div>
+                      </div>
+
+                      {/* Class */}
+                      <div>
+                        <p className="text-xs text-gray-600 font-semibold">Class</p>
+                        <p className="font-semibold text-gray-800 text-sm">{ticket.class}</p>
+                      </div>
+
+                      {/* Seat */}
+                      <div>
+                        <p className="text-xs text-gray-600 font-semibold">Seat</p>
+                        <p className="font-bold text-lg text-blue-700">{ticket.seat}</p>
+                      </div>
+
+                      {/* Passenger */}
+                      <div className="flex items-start gap-2">
+                        <Users className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-600 font-semibold">Passenger</p>
+                          <p className="font-semibold text-gray-800 text-sm truncate">{ticket.passenger?.name || "N/A"}</p>
+                        </div>
+                      </div>
+
+                      {/* Booking Date */}
+                      <div>
+                        <p className="text-xs text-gray-600 font-semibold">Booked</p>
+                        <p className="font-semibold text-gray-800 text-sm">{new Date(ticket.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions - Responsive */}
+                  <div className="w-full flex gap-2 pt-3 border-t border-gray-100">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      onClick={() => navigate(`/ticket-preview/${ticket._id}`, { state: { ticket } })}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                    >
+                      View Details
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

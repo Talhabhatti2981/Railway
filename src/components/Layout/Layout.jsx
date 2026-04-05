@@ -13,7 +13,7 @@ const Layout = ({ children }) => {
       {!isAuthPage && <Navbar />}
       <div className="flex">
         {!isAuthPage && <Sidebar />}
-        <main className={`flex-1 p-6 ${!isAuthPage ? 'lg:ml-0' : ''}`}>
+        <main className={`flex-1   ${!isAuthPage ? 'lg:ml-0' : ''}`}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

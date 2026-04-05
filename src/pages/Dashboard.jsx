@@ -3,6 +3,33 @@ import { Link } from 'react-router-dom';
 import { Ticket, TrendingUp } from 'lucide-react';
 import { bookingAPI, complaintAPI } from '../utils/api';
 import { useEffect, useState } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -19,6 +46,10 @@ const Dashboard = () => {
   }, []);
 
   const [chartData, setChartData] = useState([]);
+  const [complaintChartData, setComplaintChartData] = useState({
+    categories: {},
+    statuses: { Pending: 0, Resolved: 0 },
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -54,6 +85,27 @@ const Dashboard = () => {
           count,
         }));
         setChartData(chart);
+
+        // Calculate complaints by category and status
+        const complaintsByCategory = {};
+        let pendingCount = 0;
+        let resolvedCount = 0;
+
+        complaints.forEach(complaint => {
+          // Count by category
+          complaintsByCategory[complaint.category] = (complaintsByCategory[complaint.category] || 0) + 1;
+          // Count by status
+          if (complaint.status === 'Pending') {
+            pendingCount++;
+          } else if (complaint.status === 'Resolved') {
+            resolvedCount++;
+          }
+        });
+
+        setComplaintChartData({
+          categories: complaintsByCategory,
+          statuses: { Pending: pendingCount, Resolved: resolvedCount },
+        });
       } catch (error) {
         console.error('Error loading stats:', error);
       }
@@ -161,53 +213,177 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100 mt-6"
+          className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100 mt-6"
         >
           <h2 className="text-xl font-bold text-blue-900 mb-4">Bookings by Train</h2>
-          <div className="h-64">
-            <svg viewBox="0 0 400 200" className="w-full h-full">
-              {chartData.map((item, index) => {
-                const barWidth = 40;
-                const barSpacing = 60;
-                const maxCount = Math.max(...chartData.map(d => d.count));
-                const barHeight = (item.count / maxCount) * 150;
-                const x = index * barSpacing + 50;
-                const y = 180 - barHeight;
-                return (
-                  <g key={item.train}>
-                    <rect
-                      x={x}
-                      y={y}
-                      width={barWidth}
-                      height={barHeight}
-                      fill="#2563eb"
-                      className="hover:fill-blue-400 transition-colors"
-                      rx="8"
-                    />
-                    <text
-                      x={x + barWidth / 2}
-                      y={y - 5}
-                      textAnchor="middle"
-                      className="text-sm font-bold fill-blue-900"
-                    >
-                      {item.count}
-                    </text>
-                    <text
-                      x={x + barWidth / 2}
-                      y={195}
-                      textAnchor="middle"
-                      className="text-xs fill-blue-500"
-                      transform={`rotate(-45, ${x + barWidth / 2}, 195)`}
-                    >
-                      {item.train.split(' ')[0]}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+          <div className="h-80 w-full">
+            <Bar
+              data={{
+                labels: chartData.map(item => item.train),
+                datasets: [
+                  {
+                    label: 'Number of Bookings',
+                    data: chartData.map(item => item.count),
+                    backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    tension: 0.1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    labels: {
+                      color: '#1e3a8a',
+                      font: { size: 12 },
+                    },
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    cornerRadius: 8,
+                    padding: 12,
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: { color: '#1e3a8a' },
+                    grid: { color: 'rgba(37, 99, 235, 0.1)' },
+                  },
+                  x: {
+                    ticks: { color: '#1e3a8a' },
+                    grid: { color: 'rgba(37, 99, 235, 0.1)' },
+                  },
+                },
+              }}
+            />
           </div>
         </motion.div>
       )}
+
+      {/* Charts Grid - Complaints Data */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Complaints by Category */}
+        {Object.keys(complaintChartData.categories).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100"
+          >
+            <h2 className="text-xl font-bold text-blue-900 mb-4">Complaints by Category</h2>
+            <div className="h-80 w-full flex items-center justify-center">
+              <Pie
+                data={{
+                  labels: Object.keys(complaintChartData.categories),
+                  datasets: [
+                    {
+                      label: 'Number of Complaints',
+                      data: Object.values(complaintChartData.categories),
+                      backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)',
+                      ],
+                      borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)',
+                      ],
+                      borderWidth: 2,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        color: '#1e3a8a',
+                        font: { size: 12 },
+                        padding: 15,
+                      },
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      cornerRadius: 8,
+                      padding: 12,
+                    },
+                  },
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Complaint Status Distribution */}
+        {(complaintChartData.statuses.Pending > 0 || complaintChartData.statuses.Resolved > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100"
+          >
+            <h2 className="text-xl font-bold text-blue-900 mb-4">Complaint Status</h2>
+            <div className="h-80 w-full flex items-center justify-center">
+              <Doughnut
+                data={{
+                  labels: ['Pending', 'Resolved'],
+                  datasets: [
+                    {
+                      label: 'Complaints',
+                      data: [complaintChartData.statuses.Pending, complaintChartData.statuses.Resolved],
+                      backgroundColor: [
+                        'rgba(251, 191, 36, 0.7)',
+                        'rgba(34, 197, 94, 0.7)',
+                      ],
+                      borderColor: [
+                        'rgba(251, 191, 36, 1)',
+                        'rgba(34, 197, 94, 1)',
+                      ],
+                      borderWidth: 2,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        color: '#1e3a8a',
+                        font: { size: 12 },
+                        padding: 15,
+                      },
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      cornerRadius: 8,
+                      padding: 12,
+                    },
+                  },
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </div>
 
       {/* Recent Activity / System Overview */}
       <motion.div

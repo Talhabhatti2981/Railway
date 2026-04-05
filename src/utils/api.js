@@ -4,7 +4,7 @@ export const userAPI = {
 };
 // API utility functions for Railway Management System
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Helper function for API calls
 const apiCall = async (endpoint, options = {}) => {
@@ -69,6 +69,7 @@ export const trainAPI = {
 export const bookingAPI = {
   getAll: () => apiCall('/bookings'),
   getMy: () => apiCall('/bookings/my'),
+  getById: (id) => apiCall(`/bookings/${id}`),
   getByPNR: (pnr) => apiCall(`/bookings/pnr/${pnr}`),
   getByTrain: (trainNumber, date) => apiCall(`/bookings/train/${trainNumber}/${date}`),
   getAvailableSeats: (trainNumber, date, classType) => apiCall(`/bookings/seats/${trainNumber}/${date}/${classType}`),
