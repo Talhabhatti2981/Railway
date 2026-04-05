@@ -347,8 +347,6 @@ const Complaints = () => {
               </div>
             </motion.div>
           )}
-        </div>
-
       {/* Complaint Form */}
       <AnimatePresence>
         {showForm && (
@@ -529,7 +527,8 @@ const Complaints = () => {
           ))
         )}
       </div>
-    </div>
+        </div>
+      </div>
     </div>
   );
 };
