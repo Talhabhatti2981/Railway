@@ -65,15 +65,15 @@ const Login = () => {
         </div>
 
         {/* Login Card */}
-        <div className="bg-slate-900/50 backdrop-blur-2xl border border-blue-500/20 rounded-3xl p-8 shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 animate-slide-up">
+        <div className="bg-white/50 backdrop-blur-2xl border border-blue-500/20 rounded-3xl p-8 shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 animate-slide-up">
           {/* Tab Switcher */}
-          <div className="flex gap-3 bg-slate-800/50 rounded-xl p-2 mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="flex gap-3 bg-gray-100/50 rounded-xl p-2 mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <button
               onClick={() => setIsSignup(false)}
               className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all duration-300 ${
                 !isSignup
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50'
-                  : 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-800 hover:text-gray-200'
               }`}
             >
               Sign In
@@ -83,7 +83,7 @@ const Login = () => {
               className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all duration-300 ${
                 isSignup
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50'
-                  : 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-800 hover:text-gray-200'
               }`}
             >
               Register
@@ -103,7 +103,7 @@ const Login = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 outline-none transition-all hover:border-blue-500/50"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-100/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 outline-none transition-all hover:border-blue-500/50"
                   placeholder="Full Name"
                 />
               </div>
@@ -119,7 +119,7 @@ const Login = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 outline-none transition-all hover:border-blue-500/50"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-100/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 outline-none transition-all hover:border-blue-500/50"
                 placeholder="Email Address"
               />
             </div>
@@ -134,7 +134,7 @@ const Login = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-12 pr-12 py-3.5 bg-slate-800/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 outline-none transition-all hover:border-blue-500/50"
+                className="w-full pl-12 pr-12 py-3.5 bg-gray-100/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 outline-none transition-all hover:border-blue-500/50"
                 placeholder="Password"
               />
               <button
@@ -168,12 +168,12 @@ const Login = () => {
           </form>
 
           {/* Footer Link */}
-          <div className="text-center mt-6 text-gray-400 text-sm animate-fade-in" style={{ animationDelay: isSignup ? '0.7s' : '0.6s' }}>
+          <div className="text-center mt-6 text-gray-800 text-sm animate-fade-in" style={{ animationDelay: isSignup ? '0.7s' : '0.6s' }}>
             {isSignup ? 'Already have an account? ' : "Don't have an account? "}
             <button
               type="button"
               onClick={() => setIsSignup(!isSignup)}
-              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+              className="text-blue-800 hover:text-blue-300 font-semibold transition-colors"
             >
               {isSignup ? 'Sign In' : 'Register'}
             </button>
@@ -181,7 +181,7 @@ const Login = () => {
         </div>
 
         {/* Trust Badge */}
-        <div className="text-center mt-8 text-gray-500 text-xs">
+        <div className="text-center mt-8 text-gray-800 text-xs">
           <p>🔒 Secure • ✅ Trusted • 🚄 Fast</p>
         </div>
       </div>

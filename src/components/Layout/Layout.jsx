@@ -11,13 +11,14 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {!isAuthPage && <Navbar />}
-      <div className="flex">
+      <div className="flex pt-16">
         {!isAuthPage && <Sidebar />}
-        <main className={`flex-1   ${!isAuthPage ? 'lg:ml-0' : ''}`}>
+        <main className={`flex-1 w-full lg:ml-56`}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full"
           >
             {children}
           </motion.div>

@@ -135,9 +135,8 @@ const Complaints = () => {
 
   const filteredComplaints = complaints.filter(complaint => {
     if (filter === 'all') return true;
-    // Reverse the logic: pending filter shows resolved, resolved filter shows pending
-    if (filter === 'pending') return complaint.status === 'Resolved';
-    if (filter === 'resolved') return complaint.status === 'Pending';
+    if (filter === 'pending') return complaint.status === 'Pending';
+    if (filter === 'resolved') return complaint.status === 'Resolved';
     return false;
   });
 
@@ -155,15 +154,15 @@ const Complaints = () => {
   ];
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 md:p-8 bg-slate-900 min-h-screen">
+    <div className="space-y-6 p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Complaints Management</h1>
-            <p className="text-gray-400 text-sm sm:text-base">File and manage complaints</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Complaints Management</h1>
+            <p className="text-gray-600 text-sm sm:text-base">File and manage complaints</p>
           </motion.div>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -181,48 +180,48 @@ const Complaints = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-7 border border-slate-700"
+            className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-gray-400">Total Complaints</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white">{complaints.length}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Complaints</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{complaints.length}</p>
               </div>
-              <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+              <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-gray-500" />
             </div>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-7 border border-slate-700"
+            className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-gray-400">Pending</p>
-                <p className="text-2xl sm:text-3xl font-bold text-yellow-400">{pendingCount}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Pending</p>
+                <p className="text-2xl sm:text-3xl font-bold text-yellow-600">{pendingCount}</p>
               </div>
-              <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-400" />
+              <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-600" />
             </div>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-7 border border-slate-700"
+            className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-gray-400">Resolved</p>
-                <p className="text-2xl sm:text-3xl font-bold text-green-400">{resolvedCount}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Resolved</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">{resolvedCount}</p>
               </div>
-              <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-400" />
+              <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
             </div>
           </motion.div>
         </div>
 
         {/* Filter - Mobile Responsive */}
-        <div className="bg-slate-800 rounded-2xl shadow-lg p-4 sm:p-5 border border-slate-700">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-5 border border-gray-200">
           <div className="flex flex-wrap gap-2">
             {['all', 'pending', 'resolved'].map((filterOption) => (
               <motion.button
@@ -233,7 +232,7 @@ const Complaints = () => {
                 className={`flex-1 min-w-max px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
                   filter === filterOption
                     ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
                 {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
@@ -248,7 +247,7 @@ const Complaints = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-7 border border-slate-700"
+              className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200"
             >
               <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Complaints by Category</h3>
               <div className="h-80 w-full flex items-center justify-center">
@@ -305,9 +304,9 @@ const Complaints = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-7 border border-slate-700"
+              className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200"
             >
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Complaints by Status</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Complaints by Status</h3>
               <div className="h-80 w-full flex items-center justify-center">
                 <Bar
                   data={{
@@ -354,7 +353,7 @@ const Complaints = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-8 border border-slate-700"
+              className="bg-white rounded-2xl shadow-xl p-5 sm:p-8 border border-gray-200"
           >
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">File a Complaint</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -365,7 +364,7 @@ const Complaints = () => {
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     required
-                    className="w-full px-4 py-2 sm:py-3 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-slate-700 text-white"
+                    className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-white text-gray-900"
                   >
                     <option value="">Select Category</option>
                     {categories.map(cat => (
@@ -380,7 +379,7 @@ const Complaints = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    className="w-full px-4 py-2 sm:py-3 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-slate-700 text-white placeholder-gray-400"
+                    className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-white text-gray-900 placeholder-gray-500"
                     placeholder="Enter your name"
                   />
                 </div>
@@ -391,7 +390,7 @@ const Complaints = () => {
                     value={formData.trainNumber}
                     onChange={(e) => setFormData({ ...formData, trainNumber: e.target.value })}
                     required
-                    className="w-full px-4 py-2 sm:py-3 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-slate-700 text-white placeholder-gray-400"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     placeholder="Enter train number"
                   />
                 </div>
@@ -403,7 +402,7 @@ const Complaints = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
                   rows={4}
-                  className="w-full px-4 py-2 sm:py-3 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-slate-700 text-white placeholder-gray-400"
+                  className="w-full px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base bg-white text-gray-900 placeholder-gray-500"
                   placeholder="Describe your complaint in detail..."
                 />
               </div>
@@ -421,7 +420,7 @@ const Complaints = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={resetForm}
-                  className="flex-1 px-4 py-3 sm:px-6 sm:py-3 bg-slate-700 text-gray-300 rounded-lg font-semibold hover:bg-slate-600 text-sm sm:text-base"
+                  className="flex-1 px-4 py-3 sm:px-6 sm:py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 text-sm sm:text-base"
                 >
                   Cancel
                 </motion.button>
@@ -437,7 +436,7 @@ const Complaints = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-slate-800 rounded-2xl shadow-xl p-8 sm:p-12 border border-slate-700 text-center"
+            className="bg-white rounded-2xl shadow-xl p-8 sm:p-12 border border-gray-200 text-center"
           >
             <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-gray-500 mx-auto mb-4" />
             <p className="text-gray-400 text-base sm:text-lg">No complaints found</p>
@@ -449,15 +448,15 @@ const Complaints = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-slate-800 rounded-2xl shadow-xl p-5 sm:p-7 border border-slate-700 hover:shadow-2xl hover:scale-[1.02] transition-all"
+              className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200 hover:shadow-2xl hover:scale-[1.02] transition-all"
             >
               <div className="flex flex-col gap-4">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 gap-y-2 mb-3">
                     <span className={`px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold ${
                       complaint.status === 'Pending'
-                        ? 'bg-yellow-900 text-yellow-200'
-                        : 'bg-green-900 text-green-200'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-green-100 text-green-700'
                     }`}>
                       {complaint.status}
                     </span>
@@ -476,19 +475,8 @@ const Complaints = () => {
                   </p>
                   <p className="text-sm sm:text-base text-gray-400">{complaint.description}</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-slate-700">
+                <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-300">
                   {filter === 'pending' && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleStatusChange(complaint._id || complaint.id, 'Pending')}
-                      className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 flex items-center justify-center space-x-2 text-sm sm:text-base"
-                    >
-                      <Clock className="h-4 w-4" />
-                      <span>Mark Pending</span>
-                    </motion.button>
-                  )}
-                  {filter === 'resolved' && (
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -497,6 +485,17 @@ const Complaints = () => {
                     >
                       <CheckCircle className="h-4 w-4" />
                       <span>Mark Resolved</span>
+                    </motion.button>
+                  )}
+                  {filter === 'resolved' && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleStatusChange(complaint._id || complaint.id, 'Pending')}
+                      className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 flex items-center justify-center space-x-2 text-sm sm:text-base"
+                    >
+                      <Clock className="h-4 w-4" />
+                      <span>Mark Pending</span>
                     </motion.button>
                   )}
                   {filter === 'all' && complaint.status === 'Pending' && (
@@ -534,5 +533,4 @@ const Complaints = () => {
 };
 
 export default Complaints;
-
 

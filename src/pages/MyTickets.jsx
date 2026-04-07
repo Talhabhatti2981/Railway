@@ -3,13 +3,14 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { bookingAPI } from "../utils/api";
-import { Ticket, Calendar, MapPin, Users } from "lucide-react";
+import { Ticket, Calendar, MapPin, Users, Filter } from "lucide-react";
 
 const MyTickets = () => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("all"); // all, pending, resolved
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -28,88 +29,141 @@ const MyTickets = () => {
     fetchTickets();
   }, []);
 
+  // Filter tickets based on status
+  const filteredTickets = tickets.filter((ticket) => {
+    if (filter === "all") return true;
+    if (filter === "pending") return ticket.status === "PENDING";
+    if (filter === "resolved") return ticket.status === "RESOLVED";
+    return true;
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="space-y-6 p-4 sm:p-6 md:p-8 bg-white min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-4xl font-bold text-blue-900 mb-2 flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
             <Ticket className="h-8 w-8" />
             My Tickets
           </h1>
-          <p className="text-blue-700 mb-6">View all your bookings</p>
+          <p className="text-gray-600">View all your bookings</p>
         </motion.div>
 
+        {/* Filter Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-50 rounded-2xl shadow-lg p-4 border border-gray-200"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <Filter className="h-5 w-5 text-gray-600" />
+            <span className="text-gray-700 font-semibold">Filter by Status:</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { value: "all", label: "All Tickets" },
+              { value: "pending", label: "Pending" },
+              { value: "resolved", label: "Resolved" },
+            ].map((option) => (
+              <motion.button
+                key={option.value}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setFilter(option.value)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm sm:text-base ${
+                  filter === option.value
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {option.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Loading */}
         {loading && (
           <div className="text-center py-12">
             <div className="inline-block">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
             <p className="text-gray-600 mt-4">Loading tickets...</p>
           </div>
         )}
 
+        {/* Error */}
         {error && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg"
+            className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg"
           >
             {error}
           </motion.div>
         )}
 
-        {!loading && !error && tickets.length === 0 && (
+        {/* No Tickets */}
+        {!loading && !error && filteredTickets.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white rounded-xl shadow-md p-12 text-center"
+            className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-200"
           >
-            <Ticket className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">No tickets found</p>
+            <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 text-lg">
+              {filter === "all"
+                ? "No tickets found"
+                : `No ${filter} tickets found`}
+            </p>
           </motion.div>
         )}
 
-        {!loading && !error && tickets.length > 0 && (
+        {/* Tickets Grid */}
+        {!loading && !error && filteredTickets.length > 0 && (
           <div className="grid gap-4">
-            {tickets.map((ticket, index) => (
+            {filteredTickets.map((ticket, index) => (
               <motion.div
                 key={ticket._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6"
+                transition={{ delay: index * 0.05 }}
+                className="bg-white rounded-2xl shadow-xl border border-gray-200 hover:shadow-2xl hover:scale-[1.01] transition-all p-5 sm:p-7"
               >
                 <div className="flex flex-col justify-between gap-4">
                   <div className="flex-1">
-                    {/* PNR & Status - Responsive */}
+                    {/* PNR & Status */}
                     <div className="flex flex-wrap items-center gap-2 gap-y-2 mb-3">
-                      <span className="font-mono font-bold text-blue-700 text-sm sm:text-base">PNR: {ticket.pnr}</span>
+                      <span className="font-mono font-bold text-blue-600 text-sm sm:text-base">
+                        PNR: {ticket.pnr}
+                      </span>
                       <span
-                        className={`px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-bold ${
-                          ticket.status === "RESOLVED"
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          ticket.status === "CONFIRMED"
                             ? "bg-green-100 text-green-700"
-                            : ticket.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-gray-100 text-gray-700"
+                            : ticket.status === "RESOLVED"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {ticket.status}
+                        {ticket.status === "CONFIRMED" ? "✓ Confirmed" : ticket.status === "RESOLVED" ? "✓ Completed" : "Pending"}
                       </span>
                     </div>
 
                     {/* Train Info */}
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3">
-                      {ticket.trainName} <span className="text-xs sm:text-sm text-gray-500">#{ticket.trainNumber}</span>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                      {ticket.trainName}{" "}
+                      <span className="text-xs sm:text-sm text-gray-500">#{ticket.trainNumber}</span>
                     </h3>
 
-                    {/* Ticket Details Grid - Mobile Optimized */}
+                    {/* Ticket Details Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                       {/* From */}
                       <div className="flex items-start gap-2">
                         <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs text-gray-600 font-semibold">From</p>
-                          <p className="font-semibold text-gray-800 truncate">{ticket.from}</p>
+                          <p className="font-semibold text-gray-900 truncate">{ticket.from}</p>
                         </div>
                       </div>
 
@@ -118,7 +172,7 @@ const MyTickets = () => {
                         <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs text-gray-600 font-semibold">To</p>
-                          <p className="font-semibold text-gray-800 truncate">{ticket.to}</p>
+                          <p className="font-semibold text-gray-900 truncate">{ticket.to}</p>
                         </div>
                       </div>
 
@@ -127,20 +181,20 @@ const MyTickets = () => {
                         <Calendar className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs text-gray-600 font-semibold">Date</p>
-                          <p className="font-semibold text-gray-800 text-sm">{ticket.date}</p>
+                          <p className="font-semibold text-gray-900 text-sm">{ticket.date}</p>
                         </div>
                       </div>
 
                       {/* Class */}
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">Class</p>
-                        <p className="font-semibold text-gray-800 text-sm">{ticket.class}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{ticket.class}</p>
                       </div>
 
                       {/* Seat */}
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">Seat</p>
-                        <p className="font-bold text-lg text-blue-700">{ticket.seat}</p>
+                        <p className="font-bold text-lg text-blue-600">{ticket.seat}</p>
                       </div>
 
                       {/* Passenger */}
@@ -148,23 +202,29 @@ const MyTickets = () => {
                         <Users className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs text-gray-600 font-semibold">Passenger</p>
-                          <p className="font-semibold text-gray-800 text-sm truncate">{ticket.passenger?.name || "N/A"}</p>
+                          <p className="font-semibold text-gray-900 text-sm truncate">
+                            {ticket.passenger?.name || "N/A"}
+                          </p>
                         </div>
                       </div>
 
                       {/* Booking Date */}
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">Booked</p>
-                        <p className="font-semibold text-gray-800 text-sm">{new Date(ticket.createdAt).toLocaleDateString()}</p>
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {new Date(ticket.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Actions - Responsive */}
-                  <div className="w-full flex gap-2 pt-3 border-t border-gray-100">
+                  {/* Actions */}
+                  <div className="w-full flex gap-2 pt-3 border-t border-gray-300">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
-                      onClick={() => navigate(`/ticket-preview/${ticket._id}`, { state: { ticket } })}
+                      onClick={() =>
+                        navigate(`/ticket-preview/${ticket._id}`, { state: { ticket } })
+                      }
                       whileTap={{ scale: 0.95 }}
                       className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base"
                     >
