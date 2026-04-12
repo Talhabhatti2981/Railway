@@ -68,7 +68,10 @@ const Complaints = () => {
         const response = await complaintAPI.getMy();
         allComplaints = Array.isArray(response) ? response : [];
       }
-      setComplaints([...allComplaints].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setComplaints(Array.isArray(allComplaints) 
+        ? [...allComplaints].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        : []
+      );
 
       // Calculate chart data
       const byCategory = {};
@@ -139,15 +142,16 @@ const Complaints = () => {
     setShowForm(false);
   };
 
-  const filteredComplaints = complaints.filter(complaint => {
+  const filteredComplaints = Array.isArray(complaints) ? complaints.filter(complaint => {
+    if (!complaint) return false;
     if (filter === 'all') return true;
     if (filter === 'pending') return complaint.status === 'Pending';
     if (filter === 'resolved') return complaint.status === 'Resolved';
     return false;
-  });
+  }) : [];
 
-  const pendingCount = complaints.filter(c => c.status === 'Pending').length;
-  const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
+  const pendingCount = Array.isArray(complaints) ? complaints.filter(c => c && c.status === 'Pending').length : 0;
+  const resolvedCount = Array.isArray(complaints) ? complaints.filter(c => c && c.status === 'Resolved').length : 0;
 
   const categories = [
     'Service Quality',
