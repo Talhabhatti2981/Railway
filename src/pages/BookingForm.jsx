@@ -213,9 +213,9 @@ const BookingForm = () => {
           <div className="space-y-4">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <User className="h-4 w-4" />
-                Full Name <span className="text-red-400">*</span>
+                Full Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
