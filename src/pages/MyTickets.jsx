@@ -30,12 +30,7 @@ const MyTickets = () => {
   }, []);
 
   // Filter tickets based on status
-  const filteredTickets = tickets.filter((ticket) => {
-    if (filter === "all") return true;
-    if (filter === "pending") return ticket.status === "PENDING";
-    if (filter === "resolved") return ticket.status === "RESOLVED";
-    return true;
-  });
+  const filteredTickets = tickets;
 
   return (
     <div className="space-y-6 p-4 sm:p-6 md:p-8 bg-white min-h-screen">
@@ -47,39 +42,6 @@ const MyTickets = () => {
             My Tickets
           </h1>
           <p className="text-gray-600">View all your bookings</p>
-        </motion.div>
-
-        {/* Filter Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-50 rounded-2xl shadow-lg p-4 border border-gray-200"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <Filter className="h-5 w-5 text-gray-600" />
-            <span className="text-gray-700 font-semibold">Filter by Status:</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { value: "all", label: "All Tickets" },
-              { value: "pending", label: "Pending" },
-              { value: "resolved", label: "Resolved" },
-            ].map((option) => (
-              <motion.button
-                key={option.value}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setFilter(option.value)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm sm:text-base ${
-                  filter === option.value
-                    ? "bg-blue-600 text-white shadow-lg"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                {option.label}
-              </motion.button>
-            ))}
-          </div>
         </motion.div>
 
         {/* Loading */}
@@ -138,15 +100,9 @@ const MyTickets = () => {
                         PNR: {ticket.pnr}
                       </span>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          ticket.status === "CONFIRMED"
-                            ? "bg-green-100 text-green-700"
-                            : ticket.status === "RESOLVED"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
+                        className="px-3 py-1 rounded-full text-xs font-extrabold bg-green-500 text-white shadow-sm ring-2 ring-green-200"
                       >
-                        {ticket.status === "CONFIRMED" ? "✓ Confirmed" : ticket.status === "RESOLVED" ? "✓ Completed" : "Pending"}
+                        ✓ Confirmed
                       </span>
                     </div>
 
