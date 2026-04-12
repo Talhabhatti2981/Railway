@@ -31,7 +31,6 @@ const Sidebar = () => {
       { path: '/', label: 'Dashboard', icon: '🏠' },
       { path: '/profile', label: 'Profile', icon: '👤' },
       { path: '/schedule', label: 'Schedule', icon: '🚆' },
-      { path: '/admin/add-train', label: 'Manage Trains', icon: '🚂' },
       { path: '/complaints', label: 'Complaints', icon: '📝' },
     ];
   } else {
