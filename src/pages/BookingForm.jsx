@@ -159,7 +159,7 @@ const BookingForm = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/book-ticket')}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ChevronLeft className="h-5 w-5" />
           Back to Search
