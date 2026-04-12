@@ -309,7 +309,7 @@ const Schedule = () => {
                         <input
                           type="text"
                           required
-                          placeholder="e.g., Delhi"
+                          placeholder="e.g., Lahore"
                           value={formData.from}
                           onChange={e => setFormData({ ...formData, from: e.target.value })}
                           className="w-full px-4 py-3 bg-white text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
@@ -320,7 +320,7 @@ const Schedule = () => {
                         <input
                           type="text"
                           required
-                          placeholder="e.g., Mumbai"
+                          placeholder="e.g., Islamabad"
                           value={formData.to}
                           onChange={e => setFormData({ ...formData, to: e.target.value })}
                           className="w-full px-4 py-3 bg-white text-gray-900 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
