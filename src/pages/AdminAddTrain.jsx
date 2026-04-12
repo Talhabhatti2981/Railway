@@ -60,14 +60,27 @@ const AdminAddTrain = () => {
     }
   };
 
-  const handleClassChange = (e) => {
-    const selectedClasses = Array.from(e.target.selectedOptions, option => option.value);
-    const newSeats = {};
-    const newFare = {};
-    selectedClasses.forEach(cls => {
-      newSeats[cls] = formData.seats[cls] || 0;
-      newFare[cls] = formData.fare[cls] || 0;
-    });
+  const handleClassChange = (cls) => {
+    const isSelected = formData.classes.includes(cls);
+    let selectedClasses;
+    
+    if (isSelected) {
+      selectedClasses = formData.classes.filter(c => c !== cls);
+    } else {
+      selectedClasses = [...formData.classes, cls];
+    }
+
+    const newSeats = { ...formData.seats };
+    const newFare = { ...formData.fare };
+
+    if (!isSelected) {
+      newSeats[cls] = 0;
+      newFare[cls] = 0;
+    } else {
+      delete newSeats[cls];
+      delete newFare[cls];
+    }
+
     setFormData({
       ...formData,
       classes: selectedClasses,
@@ -270,16 +283,22 @@ const AdminAddTrain = () => {
                   {trainClasses.map((cls) => (
                     <label
                       key={cls}
-                      className="flex items-center p-3 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                      className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all group ${
+                        formData.classes.includes(cls) 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+                      }`}
                     >
                       <input
                         type="checkbox"
                         value={cls}
                         checked={formData.classes.includes(cls)}
-                        onChange={handleClassChange}
+                        onChange={() => handleClassChange(cls)}
                         className="w-4 h-4 text-blue-600 rounded cursor-pointer"
                       />
-                      <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-blue-600">{cls}</span>
+                      <span className={`ml-2 text-sm font-medium ${
+                        formData.classes.includes(cls) ? 'text-blue-600' : 'text-gray-700'
+                      } group-hover:text-blue-600`}>{cls}</span>
                     </label>
                   ))}
                 </div>

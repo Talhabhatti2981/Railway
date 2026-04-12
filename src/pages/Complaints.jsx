@@ -60,27 +60,33 @@ const Complaints = () => {
     try {
       setLoading(true);
       setError('');
-      let allComplaints;
+      let allComplaints = [];
       if (user && user.role === 'admin') {
-        allComplaints = await complaintAPI.getAll();
+        const response = await complaintAPI.getAll();
+        allComplaints = Array.isArray(response) ? response : [];
       } else {
-        allComplaints = await complaintAPI.getMy();
+        const response = await complaintAPI.getMy();
+        allComplaints = Array.isArray(response) ? response : [];
       }
-      setComplaints(allComplaints.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setComplaints([...allComplaints].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
 
       // Calculate chart data
       const byCategory = {};
       let pendingCount = 0;
       let resolvedCount = 0;
 
-      allComplaints.forEach(complaint => {
-        byCategory[complaint.category] = (byCategory[complaint.category] || 0) + 1;
-        if (complaint.status === 'Pending') {
-          pendingCount++;
-        } else if (complaint.status === 'Resolved') {
-          resolvedCount++;
-        }
-      });
+      if (Array.isArray(allComplaints)) {
+        allComplaints.forEach(complaint => {
+          if (complaint && complaint.category) {
+            byCategory[complaint.category] = (byCategory[complaint.category] || 0) + 1;
+          }
+          if (complaint && complaint.status === 'Pending') {
+            pendingCount++;
+          } else if (complaint && complaint.status === 'Resolved') {
+            resolvedCount++;
+          }
+        });
+      }
 
       setChartData({
         byCategory,
