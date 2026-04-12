@@ -155,10 +155,10 @@ const AdminAddTrain = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
               Train Management
             </h1>
-            <p className="text-gray-400 text-sm sm:text-base">Add, edit, and manage trains</p>
+            <p className="text-gray-600 text-sm sm:text-base">Add, edit, and manage trains</p>
           </motion.div>
           <motion.button
             whileHover={{ scale: 1.05 }}

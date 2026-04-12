@@ -249,7 +249,7 @@ const Complaints = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-xl p-5 sm:p-7 border border-gray-200"
             >
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Complaints by Category</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Complaints by Category</h3>
               <div className="h-80 w-full flex items-center justify-center">
                 <Pie
                   data={{
@@ -287,7 +287,7 @@ const Complaints = () => {
                       legend: {
                         position: 'bottom',
                         labels: {
-                          color: '#d1d5db',
+                          color: '#374151',
                           font: { size: 11 },
                           padding: 12,
                         },
