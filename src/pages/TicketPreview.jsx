@@ -167,22 +167,12 @@ const TicketPreview = () => {
           )}
 
           {/* Status */}
-          <div className="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+          <div className="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200 text-center">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Status</h2>
             <span
-              className={`inline-block px-6 py-3 rounded-full font-bold text-sm ${
-                ticket.status === "CONFIRMED"
-                  ? "bg-green-100 text-green-800"
-                  : ticket.status === "RESOLVED"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
+              className="inline-block px-10 py-3 rounded-full font-extrabold text-sm bg-green-500 text-white shadow-md ring-4 ring-green-100 animate-pulse"
             >
-              {ticket.status === "CONFIRMED"
-                ? "✓ Ticket Confirmed"
-                : ticket.status === "RESOLVED"
-                ? "✓ Trip Completed"
-                : "⏳ Pending"}
+              ✓ Ticket Confirmed
             </span>
           </div>
 
