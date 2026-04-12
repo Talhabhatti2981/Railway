@@ -132,7 +132,6 @@ const Dashboard = () => {
   ];
 
   let quickActions = [
-    { path: '/seat-availability', label: 'Check Seats', icon: '🪑', color: 'from-orange-500 to-orange-600' },
     { path: '/complaints', label: 'Manage Complaints', icon: '⚠️', color: 'from-red-500 to-red-600' },
   ];
   if (user && user.role !== 'admin') {
