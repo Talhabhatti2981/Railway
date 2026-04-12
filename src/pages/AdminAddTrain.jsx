@@ -112,10 +112,24 @@ const AdminAddTrain = () => {
 
     try {
       setLoading(true);
+      
+      // Map classes to match backend expectations (name and totalSeats)
+      const mappedClasses = formData.classes.map(clsName => ({
+        name: clsName,
+        totalSeats: parseInt(formData.seats[clsName]) || 0,
+        fare: parseInt(formData.fare[clsName]) || 0
+      }));
+
+      const trainData = {
+        ...formData,
+        trainName: formData.name, // Ensure trainName is set for backend
+        classes: mappedClasses
+      };
+
       if (editingId) {
-        await trainAPI.update(editingId, formData);
+        await trainAPI.update(trainData.trainNumber, trainData);
       } else {
-        await trainAPI.create(formData);
+        await trainAPI.create(trainData);
       }
       await loadTrains();
       resetForm();
