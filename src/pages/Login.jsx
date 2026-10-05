@@ -34,6 +34,7 @@ const Login = () => {
       }
       if (response.user) {
         localStorage.setItem('user', JSON.stringify(response.user));
+        window.dispatchEvent(new Event('user-session-updated'));
       }
       navigate('/');
     } catch (err) {

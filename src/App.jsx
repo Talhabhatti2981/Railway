@@ -4,7 +4,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Suspense, lazy, useEffect } from 'react';
 import Loader from './components/Loader';
 import { initializeSampleData } from './utils/localStorage';
-import { ensureDefaultUsers } from './utils/authStorage';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));

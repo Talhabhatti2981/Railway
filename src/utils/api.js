@@ -1,4 +1,4 @@
-// API layer — local browser storage by default (no Vercel serverless / no DB quota).
+// API layer — MongoDB via /api on Vercel when VITE_USE_LOCAL_API is not true.
 
 import {
   localAuthAPI,
@@ -10,8 +10,8 @@ import {
   localTrackingAPI,
 } from './localApi';
 
-const USE_LOCAL =
-  import.meta.env.VITE_USE_LOCAL_API !== 'false' || import.meta.env.PROD;
+/** MongoDB API by default; set VITE_USE_LOCAL_API=true only for offline demo */
+const USE_LOCAL = import.meta.env.VITE_USE_LOCAL_API === 'true';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -74,6 +74,11 @@ export const authAPI = USE_LOCAL
         remoteApiCall('/auth/login', {
           method: 'POST',
           body: JSON.stringify(userData),
+        }),
+      updateProfile: (data) =>
+        remoteApiCall('/auth/update', {
+          method: 'PATCH',
+          body: JSON.stringify(data),
         }),
     };
 
