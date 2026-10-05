@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { userAPI } from '../utils/api';
-import axios from 'axios';
+import { userAPI, authAPI } from '../utils/api';
 
 const Profile = () => {
 	const [user, setUser] = useState(null);
@@ -33,11 +32,13 @@ const Profile = () => {
 		setError('');
 		setSuccess('');
 		try {
-			await axios.patch('/api/auth/update', {
-				id: user.id,
-				name,
-				password: password || undefined,
-			});
+			if (authAPI.updateProfile) {
+				await authAPI.updateProfile({
+					id: user.id,
+					name,
+					password: password || undefined,
+				});
+			}
 			setSuccess('Profile updated successfully!');
 			setPassword('');
 			// Optionally refetch user

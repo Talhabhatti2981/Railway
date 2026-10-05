@@ -1,6 +1,41 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, MessageCircle, Loader2 } from 'lucide-react';
 
+const CHAT_HISTORY_KEY = 'railway_chat_history';
+
+const localBotReply = (message) => {
+  const q = message.toLowerCase();
+  if (q.includes('pnr') || q.includes('ticket')) {
+    return 'Open My Tickets from the menu to view PNR and booking details. You can book from Book Ticket after signing in.';
+  }
+  if (q.includes('seat')) {
+    return 'Use Seat Availability: enter train number and date, pick a class, then choose a free seat.';
+  }
+  if (q.includes('schedule') || q.includes('train')) {
+    return 'Go to Schedule to see all trains. Admins can add or edit trains (login: admin@railway.com / admin123).';
+  }
+  if (q.includes('track')) {
+    return 'Track Train shows live-style progress on the route. Enter a train number from your schedule.';
+  }
+  if (q.includes('complaint')) {
+    return 'File complaints under Complaints — choose a category and describe the issue.';
+  }
+  if (q.includes('hello') || q.includes('hi')) {
+    return 'Hello! I can help with booking, seats, schedules, tracking, and complaints.';
+  }
+  return 'I am the built-in Railway assistant (no server needed). Ask about tickets, seats, schedule, tracking, or complaints.';
+};
+
+const loadStoredMessages = () => {
+  try {
+    const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw).map((m) => ({ ...m, timestamp: new Date(m.timestamp) }));
+  } catch {
+    return [];
+  }
+};
+
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -26,29 +61,8 @@ const ChatWidget = () => {
     }
   }, [isOpen]);
 
-  const loadChatHistory = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/chat/history?limit=20');
-      if (response.ok) {
-        const data = await response.json();
-        const historyMessages = data.messages.map(msg => ({
-          id: msg._id,
-          text: msg.userMessage,
-          isUser: true,
-          timestamp: new Date(msg.createdAt),
-        })).concat(data.messages.map(msg => ({
-          id: `${msg._id}-response`,
-          text: msg.botResponse,
-          isUser: false,
-          timestamp: new Date(msg.createdAt),
-        }))).sort((a, b) => a.timestamp - b.timestamp);
-
-        setMessages(historyMessages);
-      }
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
-      // Don't show error for history loading, just start with empty chat
-    }
+  const loadChatHistory = () => {
+    setMessages(loadStoredMessages());
   };
 
   const sendMessage = async (e) => {
@@ -70,35 +84,25 @@ const ChatWidget = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send message');
-      }
-
-      // Add bot response
+      await new Promise((r) => setTimeout(r, 400));
       const botMessage = {
         id: Date.now() + 1,
-        text: data.botResponse,
+        text: localBotReply(userMessage),
         isUser: false,
-        timestamp: new Date(data.timestamp),
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, botMessage]);
-
+      setMessages((prev) => {
+        const next = [...prev, botMessage];
+        localStorage.setItem(
+          CHAT_HISTORY_KEY,
+          JSON.stringify(next.slice(-40))
+        );
+        return next;
+      });
     } catch (err) {
       console.error('Chat error:', err);
       setError('Failed to send message. Please try again.');
-
-      // Remove the user message if sending failed
-      setMessages(prev => prev.filter(msg => msg.id !== newUserMessage.id));
+      setMessages((prev) => prev.filter((msg) => msg.id !== newUserMessage.id));
     } finally {
       setIsLoading(false);
     }
