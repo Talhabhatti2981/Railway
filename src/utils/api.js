@@ -10,8 +10,13 @@ import {
   localTrackingAPI,
 } from './localApi';
 
-/** MongoDB API by default; set VITE_USE_LOCAL_API=true only for offline demo */
-const USE_LOCAL = import.meta.env.VITE_USE_LOCAL_API === 'true';
+/**
+ * Use the built-in local demo API by default when no dedicated backend is configured.
+ * Set VITE_USE_LOCAL_API=false only when you have a real MongoDB API running.
+ */
+const USE_LOCAL =
+  import.meta.env.VITE_USE_LOCAL_API !== 'false' &&
+  (import.meta.env.DEV || import.meta.env.VITE_USE_LOCAL_API === 'true');
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
