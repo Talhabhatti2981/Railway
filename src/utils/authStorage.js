@@ -24,7 +24,7 @@ const writeUsers = (users) => {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
-export const ADMIN_EMAIL = 'admin@admin';
+export const ADMIN_EMAIL = 'admin@gmail.com';
 
 const DEFAULT_ADMIN = {
   id: 'user_admin',
@@ -114,7 +114,7 @@ export const authStorage = {
       const isReservedAdmin =
         users[index].email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
       if (role === 'admin' && !isReservedAdmin) {
-        throw new Error('Only admin@admin can be admin');
+        throw new Error('Only admin@gmail.com can be admin');
       }
       if (isReservedAdmin && role !== 'admin') {
         throw new Error('Built-in admin role cannot be changed');

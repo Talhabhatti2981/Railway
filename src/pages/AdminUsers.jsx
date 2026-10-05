@@ -109,7 +109,7 @@ const AdminUsers = () => {
         </div>
 
         <p className="text-xs text-gray-500">
-          Only one admin: <strong>admin@admin</strong> / password <strong>admin</strong> (name Admin).
+          Only one admin: <strong>admin@gmail.com</strong> / password <strong>admin</strong> (name Admin).
           All registrations are normal users.
         </p>
       </div>
