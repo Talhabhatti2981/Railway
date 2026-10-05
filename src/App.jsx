@@ -3,6 +3,7 @@ import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Suspense, lazy, useEffect } from 'react';
 import Loader from './components/Loader';
+import { ensureDefaultUsers } from './utils/authStorage';
 import { initializeSampleData } from './utils/localStorage';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
