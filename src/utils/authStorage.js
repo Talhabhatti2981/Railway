@@ -24,42 +24,52 @@ const writeUsers = (users) => {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
+export const ADMIN_EMAIL = 'admin@admin';
+
 const DEFAULT_ADMIN = {
   id: 'user_admin',
   name: 'Admin',
-  email: 'admin@railway.com',
-  password: 'admin123',
+  email: ADMIN_EMAIL,
+  password: 'admin',
   role: 'admin',
 };
 
-/** Always keep default admin in the users table (merge, do not wipe existing users). */
+/** Single built-in admin; everyone else is a normal user. */
 export const ensureDefaultUsers = async () => {
   const users = readUsers();
-  const hasDefaultAdmin = users.some(
+  const adminHash = await hashPassword(DEFAULT_ADMIN.password);
+  let adminIndex = users.findIndex(
     (u) => u.email.toLowerCase() === DEFAULT_ADMIN.email.toLowerCase()
   );
-  if (hasDefaultAdmin) return;
 
-  const adminHash = await hashPassword(DEFAULT_ADMIN.password);
-  users.push({
-    id: DEFAULT_ADMIN.id,
-    name: DEFAULT_ADMIN.name,
-    email: DEFAULT_ADMIN.email,
-    passwordHash: adminHash,
-    role: DEFAULT_ADMIN.role,
-  });
-  writeUsers(users);
-};
-
-export const resolveSignupRole = (users, { adminKey }) => {
-  const configuredKey =
-    import.meta.env.VITE_ADMIN_SIGNUP_KEY || 'railwayadmin';
-  if (adminKey && String(adminKey).trim() === configuredKey) {
-    return 'admin';
+  if (adminIndex === -1) {
+    users.push({
+      id: DEFAULT_ADMIN.id,
+      name: DEFAULT_ADMIN.name,
+      email: DEFAULT_ADMIN.email,
+      passwordHash: adminHash,
+      role: DEFAULT_ADMIN.role,
+    });
+  } else {
+    users[adminIndex] = {
+      ...users[adminIndex],
+      name: DEFAULT_ADMIN.name,
+      email: DEFAULT_ADMIN.email,
+      passwordHash: adminHash,
+      role: 'admin',
+    };
   }
-  const hasAdmin = users.some((u) => u.role === 'admin');
-  if (!hasAdmin) return 'admin';
-  return 'user';
+
+  users.forEach((u, i) => {
+    if (
+      u.email.toLowerCase() !== DEFAULT_ADMIN.email.toLowerCase() &&
+      u.role === 'admin'
+    ) {
+      users[i] = { ...u, role: 'user' };
+    }
+  });
+
+  writeUsers(users);
 };
 
 export const authStorage = {
@@ -68,17 +78,21 @@ export const authStorage = {
 
   findById: (id) => readUsers().find((u) => u.id === id),
 
-  createUser: async ({ name, email, password, role = 'user' }) => {
+  createUser: async ({ name, email, password }) => {
     const users = readUsers();
-    if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail === ADMIN_EMAIL.toLowerCase()) {
+      throw new Error('This email is reserved. Sign in as admin instead.');
+    }
+    if (users.some((u) => u.email.toLowerCase() === normalizedEmail)) {
       throw new Error('Email already registered');
     }
     const user = {
       id: `user_${Date.now()}`,
       name,
-      email,
+      email: email.trim(),
       passwordHash: await hashPassword(password),
-      role,
+      role: 'user',
     };
     users.push(user);
     writeUsers(users);
@@ -96,7 +110,17 @@ export const authStorage = {
     if (index === -1) throw new Error('User not found');
     if (name) users[index].name = name;
     if (password) users[index].passwordHash = await hashPassword(password);
-    if (role) users[index].role = role;
+    if (role) {
+      const isReservedAdmin =
+        users[index].email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      if (role === 'admin' && !isReservedAdmin) {
+        throw new Error('Only admin@admin can be admin');
+      }
+      if (isReservedAdmin && role !== 'admin') {
+        throw new Error('Built-in admin role cannot be changed');
+      }
+      users[index].role = role;
+    }
     writeUsers(users);
     return users[index];
   },

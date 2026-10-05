@@ -34,15 +34,6 @@ const AdminUsers = () => {
     load();
   }, [navigate]);
 
-  const handleRoleChange = async (userId, role) => {
-    try {
-      await userAPI.updateRole(userId, role);
-      await load();
-    } catch (err) {
-      setError(err.message || 'Could not update role');
-    }
-  };
-
   return (
     <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -73,7 +64,7 @@ const AdminUsers = () => {
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Role</th>
-                  <th className="px-4 py-3">Actions</th>
+                  <th className="px-4 py-3">Note</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -106,16 +97,8 @@ const AdminUsers = () => {
                           {u.role}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                          className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-                          disabled={u.id === me?.id}
-                        >
-                          <option value="user">user</option>
-                          <option value="admin">admin</option>
-                        </select>
+                      <td className="px-4 py-3 text-gray-500 text-xs">
+                        {u.role === 'admin' ? 'Built-in account' : '—'}
                       </td>
                     </tr>
                   ))
@@ -126,8 +109,8 @@ const AdminUsers = () => {
         </div>
 
         <p className="text-xs text-gray-500">
-          New admin: register with admin key <code className="bg-gray-100 px-1 rounded">railwayadmin</code>{' '}
-          or use <strong>admin@railway.com</strong> / <strong>admin123</strong>.
+          Only one admin: <strong>admin@admin</strong> / password <strong>admin</strong> (name Admin).
+          All registrations are normal users.
         </p>
       </div>
     </div>

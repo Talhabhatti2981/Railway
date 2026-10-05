@@ -12,7 +12,7 @@ const localBotReply = (message) => {
     return 'Use Seat Availability: enter train number and date, pick a class, then choose a free seat.';
   }
   if (q.includes('schedule') || q.includes('train')) {
-    return 'Go to Schedule to see all trains. Admins can add or edit trains (login: admin@railway.com / admin123).';
+    return 'Go to Schedule to see all trains. Admin login: admin@admin / admin.';
   }
   if (q.includes('track')) {
     return 'Track Train shows live-style progress on the route. Enter a train number from your schedule.';

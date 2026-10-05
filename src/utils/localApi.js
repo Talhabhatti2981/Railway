@@ -10,7 +10,6 @@ import {
   createSessionToken,
   parseSessionToken,
   ensureDefaultUsers,
-  resolveSignupRole,
 } from './authStorage';
 import { generatePNR, getAvailableSeats } from './helpers';
 
@@ -76,9 +75,7 @@ export const localAuthAPI = {
   signup: async (userData) => {
     await ensureReady();
     await delay(80);
-    const existing = authStorage.listAll();
-    const role = resolveSignupRole(existing, userData);
-    const user = await authStorage.createUser({ ...userData, role });
+    const user = await authStorage.createUser(userData);
     const publicUser = authStorage.toPublicUser(user);
     const token = createSessionToken(user);
     persistSessionUser(publicUser, token);
