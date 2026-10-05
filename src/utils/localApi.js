@@ -10,10 +10,19 @@ import {
   createSessionToken,
   parseSessionToken,
   ensureDefaultUsers,
+  resolveSignupRole,
 } from './authStorage';
 import { generatePNR, getAvailableSeats } from './helpers';
 
 const delay = (ms = 0) => new Promise((r) => setTimeout(r, ms));
+
+export const persistSessionUser = (publicUser, token) => {
+  if (token) localStorage.setItem('token', token);
+  if (publicUser) {
+    localStorage.setItem('user', JSON.stringify(publicUser));
+    window.dispatchEvent(new Event('user-session-updated'));
+  }
+};
 
 const getCurrentUser = () => {
   const token = localStorage.getItem('token');
@@ -67,9 +76,13 @@ export const localAuthAPI = {
   signup: async (userData) => {
     await ensureReady();
     await delay(80);
-    const user = await authStorage.createUser(userData);
+    const existing = authStorage.listAll();
+    const role = resolveSignupRole(existing, userData);
+    const user = await authStorage.createUser({ ...userData, role });
     const publicUser = authStorage.toPublicUser(user);
-    return { token: createSessionToken(user), user: publicUser };
+    const token = createSessionToken(user);
+    persistSessionUser(publicUser, token);
+    return { token, user: publicUser };
   },
   login: async ({ email, password }) => {
     await ensureReady();
@@ -79,7 +92,9 @@ export const localAuthAPI = {
       throw new Error('Invalid email or password');
     }
     const publicUser = authStorage.toPublicUser(user);
-    return { token: createSessionToken(user), user: publicUser };
+    const token = createSessionToken(user);
+    persistSessionUser(publicUser, token);
+    return { token, user: publicUser };
   },
   updateProfile: async ({ id, name, password }) => {
     await ensureReady();
@@ -91,12 +106,40 @@ export const localAuthAPI = {
   },
 };
 
+const requireAdmin = () => {
+  const me = getCurrentUser();
+  if (!me || me.role !== 'admin') {
+    throw new Error('Admin access required');
+  }
+  return me;
+};
+
 export const localUserAPI = {
   getMe: async () => {
     await ensureReady();
     const user = getCurrentUser();
     if (!user) throw new Error('Not authenticated');
+    persistSessionUser(user, localStorage.getItem('token'));
     return user;
+  },
+  getAll: async () => {
+    await ensureReady();
+    requireAdmin();
+    await delay(40);
+    return authStorage.listAll();
+  },
+  updateRole: async (userId, role) => {
+    await ensureReady();
+    requireAdmin();
+    if (!['admin', 'user'].includes(role)) {
+      throw new Error('Invalid role');
+    }
+    const updated = await authStorage.updateUser(userId, { role });
+    const me = getCurrentUser();
+    if (me?.id === userId) {
+      persistSessionUser(authStorage.toPublicUser(updated), localStorage.getItem('token'));
+    }
+    return authStorage.toPublicUser(updated);
   },
 };
 

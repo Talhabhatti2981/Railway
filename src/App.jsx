@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Suspense, lazy, useEffect } from 'react';
 import Loader from './components/Loader';
 import { initializeSampleData } from './utils/localStorage';
+import { ensureDefaultUsers } from './utils/authStorage';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
@@ -17,10 +18,12 @@ const Profile = lazy(() => import('./pages/Profile'));
 const MyTickets = lazy(() => import('./pages/MyTickets'));
 const TicketPreview = lazy(() => import('./pages/TicketPreview'));
 const AdminAddTrain = lazy(() => import('./pages/AdminAddTrain'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
 
 function App() {
   useEffect(() => {
     initializeSampleData();
+    ensureDefaultUsers();
   }, []);
 
   return (
@@ -40,6 +43,7 @@ function App() {
             <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
             <Route path="/ticket-preview/:id" element={<ProtectedRoute><TicketPreview /></ProtectedRoute>} />
             <Route path="/admin/add-train" element={<ProtectedRoute><AdminAddTrain /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
           </Routes>
         </Layout>
       </Suspense>

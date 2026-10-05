@@ -14,7 +14,7 @@ const Spinner = () => (
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', adminKey: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -92,6 +92,20 @@ const Login = () => {
 
           {/* Form */}
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {isSignup && (
+              <div className="relative group animate-fade-in" style={{ animationDelay: '0.15s' }}>
+                <input
+                  name="adminKey"
+                  type="text"
+                  value={formData.adminKey}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3.5 bg-gray-100/50 border border-purple-500/30 rounded-lg focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-500 outline-none"
+                  placeholder="Admin key (optional) — railwayadmin"
+                  autoComplete="off"
+                />
+              </div>
+            )}
+
             {isSignup && (
               <div className="relative group animate-fade-in" style={{ animationDelay: '0.2s' }}>
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

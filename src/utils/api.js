@@ -11,7 +11,7 @@ import {
 } from './localApi';
 
 const USE_LOCAL =
-  import.meta.env.VITE_USE_LOCAL_API !== 'false';
+  import.meta.env.VITE_USE_LOCAL_API !== 'false' || import.meta.env.PROD;
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -48,7 +48,15 @@ const remoteApiCall = async (endpoint, options = {}) => {
 
 export const userAPI = USE_LOCAL
   ? localUserAPI
-  : { getMe: () => remoteApiCall('/auth/me') };
+  : {
+      getMe: () => remoteApiCall('/auth/me'),
+      getAll: () => remoteApiCall('/auth/users'),
+      updateRole: (userId, role) =>
+        remoteApiCall(`/auth/users/${userId}/role`, {
+          method: 'PATCH',
+          body: JSON.stringify({ role }),
+        }),
+    };
 
 export const authAPI = USE_LOCAL
   ? {

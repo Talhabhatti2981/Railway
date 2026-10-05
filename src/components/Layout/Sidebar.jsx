@@ -9,11 +9,19 @@ const Sidebar = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
+  const readUser = () => {
     try {
       const userData = JSON.parse(localStorage.getItem('user'));
       setUser(userData);
-    } catch {}
+    } catch {
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    readUser();
+    window.addEventListener('user-session-updated', readUser);
+    return () => window.removeEventListener('user-session-updated', readUser);
   }, []);
 
   const handleLogout = () => {
@@ -30,6 +38,7 @@ const Sidebar = () => {
     menuItems = [
       { path: '/', label: 'Dashboard', icon: '🏠' },
       { path: '/profile', label: 'Profile', icon: '👤' },
+      { path: '/admin/users', label: 'Users', icon: '👥' },
       { path: '/schedule', label: 'Schedule', icon: '🚆' },
       { path: '/complaints', label: 'Complaints', icon: '📝' },
     ];

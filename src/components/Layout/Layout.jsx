@@ -1,12 +1,20 @@
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import ChatWidget from '../ChatWidget';
+import { userAPI } from '../../utils/api';
 
 const Layout = ({ children }) => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login';
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token || isAuthPage) return;
+    userAPI.getMe().catch(() => {});
+  }, [location.pathname, isAuthPage]);
 
   return (
     <div className="min-h-screen bg-gray-50">

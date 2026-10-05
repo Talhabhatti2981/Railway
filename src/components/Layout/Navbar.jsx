@@ -10,7 +10,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  useEffect(() => {
+  const syncAuth = () => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     if (token && userData) {
@@ -20,6 +20,12 @@ const Navbar = () => {
       setIsAuthenticated(false);
       setUser(null);
     }
+  };
+
+  useEffect(() => {
+    syncAuth();
+    window.addEventListener('user-session-updated', syncAuth);
+    return () => window.removeEventListener('user-session-updated', syncAuth);
   }, [location]);
 
   const handleLogout = () => {
