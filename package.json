@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "node api.js && vite",
     "dev:server": "node server/dev.js",
+    "dev:all": "node server/dev.js & vite",
     "build": "node api.js && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed-check": "node -e \"import('./lib/dbConnect.js').then(m=>m.default()).then(()=>import('./lib/seed.js')).then(s=>s.ensureSeedData()).then(()=>console.log('MongoDB OK + admin seeded')).then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1)})\""
   },
   "dependencies": {
     "axios": "^1.13.2",
