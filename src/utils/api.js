@@ -1,4 +1,4 @@
-// API layer — MongoDB via /api on Vercel when VITE_USE_LOCAL_API is not true.
+// API layer — MongoDB-backed API by default.
 
 import {
   localAuthAPI,
@@ -11,12 +11,9 @@ import {
 } from './localApi';
 
 /**
- * Use the built-in local demo API by default when no dedicated backend is configured.
- * Set VITE_USE_LOCAL_API=false only when you have a real MongoDB API running.
+ * Use the local demo API only when explicitly enabled.
  */
-const USE_LOCAL =
-  import.meta.env.VITE_USE_LOCAL_API !== 'false' &&
-  (import.meta.env.DEV || import.meta.env.VITE_USE_LOCAL_API === 'true');
+const USE_LOCAL = import.meta.env.VITE_USE_LOCAL_API === 'true';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -93,7 +90,9 @@ export const trainAPI = USE_LOCAL
       getAll: () => remoteApiCall('/trains'),
       getByNumber: (trainNumber) => remoteApiCall(`/trains/${trainNumber}`),
       searchByRoute: (from, to) =>
-        remoteApiCall(`/trains/search/route?from=${from}&to=${to}`),
+        remoteApiCall(
+          `/trains/search/route?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+        ),
       create: (trainData) =>
         remoteApiCall('/trains', {
           method: 'POST',

@@ -18,14 +18,17 @@ const BookTicket = () => {
   const [error, setError] = useState('');
 
   const handleSearch = async () => {
-    if (!searchData.from || !searchData.to || !searchData.date || !searchData.class) {
+    const from = searchData.from.trim();
+    const to = searchData.to.trim();
+
+    if (!from || !to || !searchData.date || !searchData.class) {
       setError('Please fill all fields');
       return;
     }
     try {
       setLoading(true);
       setError('');
-      const trains = await trainAPI.searchByRoute(searchData.from, searchData.to);
+      const trains = await trainAPI.searchByRoute(from, to);
       setAvailableTrains(trains);
     } catch (err) {
       setError('Error searching trains: ' + (err.message || 'Unknown error'));

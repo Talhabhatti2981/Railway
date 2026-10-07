@@ -35,15 +35,17 @@ export const trainStorage = {
   },
   delete: (trainNumber) => {
     const trains = trainStorage.getAll();
-    const filtered = trains.filter(t => t.trainNumber !== trainNumber);
+    const filtered = trains.filter(t => String(t.trainNumber) !== String(trainNumber));
     trainStorage.save(filtered);
     return filtered;
   },
   findByRoute: (from, to) => {
     const trains = trainStorage.getAll();
+    const normalizedFrom = String(from || '').trim().toLowerCase();
+    const normalizedTo = String(to || '').trim().toLowerCase();
     return trains.filter(train => 
-      train.from.toLowerCase() === from.toLowerCase() && 
-      train.to.toLowerCase() === to.toLowerCase()
+      String(train.from || '').trim().toLowerCase() === normalizedFrom && 
+      String(train.to || '').trim().toLowerCase() === normalizedTo
     );
   },
 };
